@@ -65,6 +65,7 @@ abstract class entity{
 	public entity(int x,int y,String entityName,String imageName) {
 		this.x = x;
 		this.y = y;
+		this.entityName = entityName;
 		try {
 		image = ImageIO.read(new File(imageName));
 		} catch (IOException e) {
