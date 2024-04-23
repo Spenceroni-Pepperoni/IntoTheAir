@@ -4,10 +4,13 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -47,6 +50,7 @@ abstract class entity{
 	boolean checkCollision = false;
 	int points = 0;
 	String entityName = "";
+	public BufferedImage image;
 	public entity(int x,int y) {
 		this.x = x;
 		this.y = y;
@@ -57,6 +61,18 @@ abstract class entity{
 		this.y = y;
 		this.entityName = entityName;
 	}
+	
+	public entity(int x,int y,String entityName,String imageName) {
+		this.x = x;
+		this.y = y;
+		try {
+		image = ImageIO.read(new File(imageName));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 
 	abstract void update();
 
@@ -194,16 +210,16 @@ class player extends entity {
 	public boolean shoot;
 	private ArrayList<entity> entities;
 	public boolean unlockedTwoLaser = true;
-	public boolean unlockedTrident;
+	public boolean unlockedTrident = false;
 	public boolean unlockedHitEnemyLaser = false;
 	public boolean unlockedReflectEnemyLaser = false;
 	public boolean unlockedTeleportToCenter = false;
-	public boolean unlockedChargeLaser = true;
+	public boolean unlockedChargeLaser = false;
 	Timer shootTimer = new Timer(250);
 	Timer chargeTimerStart = new Timer(250);
 	Timer chargeTimerFinished = new Timer(1000);
 	public player(int x, int y,ArrayList<entity> entities) {
-		super(x, y,"player");
+		super(x, y,"player","playerImage.png");
 		this.entities = entities;
 		checkCollision = true;
 		// TODO Auto-generated constructor stub
@@ -266,7 +282,8 @@ class player extends entity {
 	@Override
 	void draw(Graphics g) {
 		// TODO Auto-generated method stub
-		g.fill3DRect(x,50,20,20, true);
+		//g.fill3DRect(x,50,20,20, true);
+		g.drawImage(image,x,50,null);
 		for (int i=0;i<health;i++){
 			g.fill3DRect(25+i*25,25,20,20, true);
 		}
