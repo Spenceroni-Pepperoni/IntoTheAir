@@ -161,7 +161,7 @@ class alien extends entity{
 	int speed = 1; // in pixels
 	myPanel MyPanel;
 	public alien(int x,int y,myPanel MyPanel,int speed){
-		super(x,y);
+		super(x,y,"bloon","Bloon_BLUE.png");
 		this.MyPanel = MyPanel;
 		this.speed = speed;
 	}
@@ -177,7 +177,7 @@ class alien extends entity{
 	}
 
 	public void draw(Graphics g){
-		g.fill3DRect(x,y,width,height, true);
+		g.drawImage(image,x,y,255/5,330/5,null);
 	}
 
 	public boolean hasCollided(int otherX,int otherY){
@@ -212,7 +212,7 @@ class player extends entity {
 	private ArrayList<entity> entities;
 	public boolean unlockedTwoLaser = true;
 	public boolean unlockedTrident = false;
-	public boolean unlockedHitEnemyLaser = false;
+	public boolean unlockedHitEnemyLaser = true;
 	public boolean unlockedReflectEnemyLaser = false;
 	public boolean unlockedTeleportToCenter = false;
 	public boolean unlockedChargeLaser = false;
@@ -220,7 +220,7 @@ class player extends entity {
 	Timer chargeTimerStart = new Timer(250);
 	Timer chargeTimerFinished = new Timer(1000);
 	public player(int x, int y,ArrayList<entity> entities) {
-		super(x, y,"player","playerImage.png");
+		super(x, y,"player","player.png");
 		this.entities = entities;
 		checkCollision = true;
 		// TODO Auto-generated constructor stub
@@ -284,7 +284,7 @@ class player extends entity {
 	void draw(Graphics g) {
 		// TODO Auto-generated method stub
 		//g.fill3DRect(x,50,20,20, true);
-		g.drawImage(image,x,50,null);
+		g.drawImage(image,x-28,50,330/5,240/5,null);
 		for (int i=0;i<health;i++){
 			g.fill3DRect(25+i*25,25,20,20, true);
 		}
