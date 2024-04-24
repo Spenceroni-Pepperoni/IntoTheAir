@@ -107,6 +107,8 @@ class laserBeam extends entity {
 	public void draw(Graphics g) {
 		g.setColor(Color.magenta);
 		g.drawLine(x, y, x, y+30);
+		g.drawLine(x+1, y, x+1, y+30);
+		g.drawLine(x+2, y, x+2, y+30);
 	}
 	public void collided(entity otherEntity){
 		otherEntity.removeThisObject();
