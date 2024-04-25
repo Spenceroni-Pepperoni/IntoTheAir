@@ -139,7 +139,9 @@ class alienLaserBeam extends entity {
 
 	public void draw(Graphics g) {
 		g.setColor(Color.red);
-		g.drawLine(x, y, x, y + 30);
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setStroke(new BasicStroke(5));
+		g2.drawLine(x, y, x, y + 30);
 	}
 
 	public void collided(entity otherEntity) {
@@ -161,19 +163,24 @@ class alien extends entity{
 	int width = 40;
 	int height = 40;
 	int speed = 1; // in pixels
+	String imageName;
 	myPanel MyPanel;
-	public alien(int x,int y,myPanel MyPanel,int speed){
-		super(x,y,"bloon","Bloon_BLUE.png");
+
+
+	public alien(int x,int y,myPanel MyPanel,int speed, String imageName){
+		super(x,y,"bloon",imageName);
+
 		this.MyPanel = MyPanel;
 		this.speed = speed;
 	}
 	public void update(){
-		y-=speed;
+		double dSpeed = speed;
+		y-= dSpeed / 2.0;
 		if (y < 0) {
 			MyPanel.myPlayer.looseHealth();
 			removeThisObject();
 		}
-		if (Math.random() < 0.001){
+		if (Math.random() < 0.005){
 			MyPanel.entities.add(new alienLaserBeam(x,y-50,MyPanel));
 		}
 	}
@@ -198,11 +205,31 @@ class alienFactory{
 	}
 
 	public alien newAlien(int x, int y){
-		return new alien(x,y,MyPanel,1);
+		
+		return new alien(x,y,MyPanel,1,"Images/Bloon_BLUE.png");
 	}
 
 	public alien newAlien(int x, int y,int speed){
-		return new alien(x,y,MyPanel,speed);
+
+		if(speed > 3){
+			return new alien(x,y,MyPanel,speed, "Images/Bloon_GREY.png");
+		}
+
+		switch (speed) {
+			case 2:
+			return new alien(x,y,MyPanel,speed, "Images/Bloon_GREEN.png");
+		
+			case 3:
+			return new alien(x,y,MyPanel,speed, "Images/Bloon_RED.png");
+
+			default:
+			return new alien(x,y,MyPanel,speed, "Images/Bloon_BLUE.png");
+		}
+
+	}
+
+	public alien newAlien(int x, int y,int speed, boolean vis){
+		return new alien(x,y,MyPanel,speed, "");
 	}
 }
 
@@ -222,7 +249,7 @@ class player extends entity {
 	Timer chargeTimerStart = new Timer(250);
 	Timer chargeTimerFinished = new Timer(1000);
 	public player(int x, int y,ArrayList<entity> entities) {
-		super(x, y,"player","player.png");
+		super(x, y,"player","Images/player.png");
 		this.entities = entities;
 		checkCollision = true;
 		// TODO Auto-generated constructor stub
@@ -256,7 +283,6 @@ class player extends entity {
 
 		if (shoot && shootTimer.finished() && !chargeTimerStart.finished()) {
 			shootTimer.reset();
-			System.out.println("shoot");
 
 			if (playerDirection == 0){
 				if (unlockedTrident){
@@ -288,7 +314,8 @@ class player extends entity {
 		//g.fill3DRect(x,50,20,20, true);
 		g.drawImage(image,x-28,50,330/5,240/5,null);
 		for (int i=0;i<health;i++){
-			g.fill3DRect(25+i*25,25,20,20, true);
+			//g.fill3DRect(25+i*25,25,20,20, true);
+			g.drawImage(image, 25+i*25,25,55,55, null);
 		}
 		g.drawString(""+points+"Points", 750, 900);
 	}
@@ -388,6 +415,8 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	wave currentWave;
 	BufferedImage screenBuffer = new BufferedImage(1000,1000,BufferedImage.TYPE_INT_ARGB);
 	Graphics bufferG;
+	alienFactory AlienFactory;
+	Random rand = new Random();
 	long lastTime = 0;
 	public static player myPlayer;
 	int playerDirection = 0;
@@ -395,117 +424,80 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	myPanel(){
 		myPlayer = new player(0, 0,entities);
 		entities.add(myPlayer);
-		Random rand = new Random();
-		alienFactory AlienFactory = new alienFactory(this);
+		
+		AlienFactory = new alienFactory(this);
 
-		wave wave1 = new wave(entities);
-		//Spawn the first wave
-		wave1.add(AlienFactory.newAlien(500,950));
-		wave1.add(AlienFactory.newAlien(600,950));
-		wave1.add(AlienFactory.newAlien(400,950));
-		wave1.add(AlienFactory.newAlien(500,850));
-		wave1.add(AlienFactory.newAlien(600,850));
-		wave1.add(AlienFactory.newAlien(400,850));
-		waves.add(wave1);
-
-		wave testWave = new wave(entities);
-		//Spawn the first wave
-		testWave.add(AlienFactory.newAlien(500,950+400));
-		testWave.add(AlienFactory.newAlien(600,950+400,3));
-		testWave.add(AlienFactory.newAlien(400,1150+400));
-		testWave.add(AlienFactory.newAlien(200,850+400));
-		testWave.add(AlienFactory.newAlien(600,850+400,3));
-		testWave.add(AlienFactory.newAlien(400,850+400));
-		int centerX = 500;
-		int centerY = 1300+400;
-		for(int i=0;i<15;i++) {
-			testWave.add(AlienFactory.newAlien((int)rand.nextGaussian(centerX, 50),(int)rand.nextGaussian(centerY, 100)));
-		}
-		waves.add(testWave);
-
-		wave testWave2 = new wave(entities);
-		testWave2.add(AlienFactory.newAlien(500,950+350,3));
-		testWave2.add(AlienFactory.newAlien(600,950+350,3));
-		testWave2.add(AlienFactory.newAlien(600,1950+350,4));
-
-		centerX = 500;
-		centerY = 1300+350;
-		for(int i=0;i<5;i++) {
-			testWave2.add(AlienFactory.newAlien((int)rand.nextGaussian(centerX, 150),(int)rand.nextGaussian(centerY, 100)));
-		}
-		centerX = 500;
-		centerY = 2300+350;
-		for(int i=0;i<5;i++) {
-			testWave2.add(AlienFactory.newAlien((int)rand.nextGaussian(centerX, 150),(int)rand.nextGaussian(centerY, 100),3));
-		}
-		waves.add(testWave2);
-
-		wave wave2 = new wave(entities);
-		for(int i=0;i<20;i++) {
-			if (rand.nextBoolean()) {
-				wave2.add(AlienFactory.newAlien(rand.nextInt(400)+rand.nextInt(400),rand.nextInt(1000)+1300,rand.nextInt(2)+1));
-			}else {
-				wave2.add(AlienFactory.newAlien(rand.nextInt(400)+rand.nextInt(400),rand.nextInt(1000)+1300,rand.nextInt(3)+1));
-			}
-		}
-
-		for(int i=0;i<5;i++) {
-			wave2.add(AlienFactory.newAlien(rand.nextInt(900),rand.nextInt(500)+2500,3));
-		}
-		waves.add(wave2);
-
-		wave waveSnake = new wave(entities);
-		for(int i=0;i<5;i++) {
-			waveSnake.add(AlienFactory.newAlien(400,1950+i*25,1));
-		}
-		for(int i=0;i<5;i++) {
-			waveSnake.add(AlienFactory.newAlien(800,2350+i*25,2));
-		}
-		for(int i=0;i<5;i++) {
-			waveSnake.add(AlienFactory.newAlien(550,2950+i*25,3));
-		}
-		waves.add(waveSnake);
-
-		wave wave3 = new wave(entities);
-		centerX = 600;
-		centerY = 900;
-		for(int i=0;i<15;i++) {
-			wave3.add(AlienFactory.newAlien((int)rand.nextGaussian(centerX, 50),(int)rand.nextGaussian(centerY, 70)));
-		}
-		centerX = 300;
-		centerY = 1400;
-		for(int i=0;i<15;i++) {
-			wave3.add(AlienFactory.newAlien((int)rand.nextGaussian(centerX, 50),(int)rand.nextGaussian(centerY, 70)));
-		}
-		centerX = 500;
-		centerY = 2400;
-		for(int i=0;i<25;i++) {
-			wave3.add(AlienFactory.newAlien((int)rand.nextGaussian(centerX, 90),(int)rand.nextGaussian(centerY, 90)));
-		}
-		wave3.add(AlienFactory.newAlien(500,900,3));
-		wave3.add(AlienFactory.newAlien(246,700,3));
-
-		wave3.add(AlienFactory.newAlien(500,1900,3));
-		wave3.add(AlienFactory.newAlien(246,1700,3));
-
-		wave3.add(AlienFactory.newAlien(500,2900,3));
-		wave3.add(AlienFactory.newAlien(246,2700,3));
-		waves.add(wave3);
-
+		generateWaves(1);
+		finalWave();
+		end();
 
 		wavesIterator = waves.iterator();
 		nextWave();
 	}
+
+	public void generateWaves(int num){
+		for (int i = 0; i < num; i++){
+			wave temp = new wave(entities);
+			temp.add(AlienFactory.newAlien(500,950));
+			temp.add(AlienFactory.newAlien(600,950));
+			temp.add(AlienFactory.newAlien(400,950));
+			temp.add(AlienFactory.newAlien(500,850));
+			temp.add(AlienFactory.newAlien(600,850));
+			temp.add(AlienFactory.newAlien(400,850));
+
+			temp.add(AlienFactory.newAlien(500,750, 2));
+			temp.add(AlienFactory.newAlien(600,750, 2));
+			temp.add(AlienFactory.newAlien(400,750, 2));
+			temp.add(AlienFactory.newAlien(500,650, 2));
+			temp.add(AlienFactory.newAlien(600,650, 2));
+			temp.add(AlienFactory.newAlien(400,650, 2));
+
+			waves.add(temp);
+		}
+	}
+
 
 	public void nextWave() {
 		currentWave = wavesIterator.next();
 		currentWave.startWave();
 	}
 
+	public void finalWave(){
+		wave temp = new wave(entities);
+
+		temp.add(AlienFactory.newAlien(500,1050, 4));
+		temp.add(AlienFactory.newAlien(600,1050, 4));
+		temp.add(AlienFactory.newAlien(400,1050, 4));
+		temp.add(AlienFactory.newAlien(500,1150, 4));
+		temp.add(AlienFactory.newAlien(600,1150, 4));
+		temp.add(AlienFactory.newAlien(400,1150, 4));
+
+		temp.add(AlienFactory.newAlien(500,950, 3));
+		temp.add(AlienFactory.newAlien(600,950, 3));
+		temp.add(AlienFactory.newAlien(400,950, 3));
+		temp.add(AlienFactory.newAlien(500,850, 3));
+		temp.add(AlienFactory.newAlien(600,850, 3));
+		temp.add(AlienFactory.newAlien(400,850, 3));
+
+		temp.add(AlienFactory.newAlien(500,750, 2));
+		temp.add(AlienFactory.newAlien(600,750, 2));
+		temp.add(AlienFactory.newAlien(400,750, 2));
+		temp.add(AlienFactory.newAlien(500,650, 2));
+		temp.add(AlienFactory.newAlien(600,650, 2));
+		temp.add(AlienFactory.newAlien(400,650, 2));
+
+		waves.add(temp);
+	}
+
+	public void end(){
+		wave end = new wave(entities);
+
+		end.add(AlienFactory.newAlien(0,0,0,false));
+		waves.add(end);
+	}
+
 	public void setGraphics() {
 		G = getGraphics();
-		System.out.print("screenbuffer is null: ");
-		System.out.println(screenBuffer);
 		bufferG = screenBuffer.createGraphics();
 		bufferG.setFont(new Font("Arial Black", Font.BOLD, 30));
 	}
@@ -544,9 +536,14 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 		for (int i=0;i<entities.size();i++) {
 			if (entities.get(i).removeThisObject){
 				entities.remove(i);
+
 				if (currentWave.isDefeated()){
-					System.out.println("wave defeated");
-					nextWave();
+					if(waves.size() >= 1){
+						nextWave();
+					} else{
+
+					}
+
 				}
 			}
 		}
@@ -568,6 +565,8 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 //			callCount = 0;
 			paintComponent(G);
 		}
+
+
 	}
 
 	@Override
@@ -584,6 +583,10 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 			shoot = true;
 		}
+
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+			userInterface.playOn = false;
+		}
 	}
 
 	@Override
@@ -598,6 +601,12 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 			shoot = false;
 		}
+
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+			userInterface.playOn = true;
+
+		}
+
 	}
 
 	@Override
@@ -637,19 +646,51 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	}
 }
 
-public class userInterface {
+public class userInterface implements KeyListener{
+	JFrame frame;
+	myPanel panel;
+	public static boolean playOn = true;
 	userInterface() {
-		JFrame frame = new JFrame();
+		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		myPanel panel = new myPanel();
+		panel = new myPanel();
 		frame.addKeyListener(panel);
 		frame.getContentPane().add(panel);
 		frame.setSize(1000,1000);
 		frame.setVisible(true);
 
 		panel.setGraphics();
-		while (true) {
+		while (playOn) {
 			panel.redraw();
 		}
 	}
+
+	public void periodic(){
+
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+			userInterface.playOn = false;
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+			userInterface.playOn = true;
+
+		}
+
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
 }
