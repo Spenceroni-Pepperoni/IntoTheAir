@@ -114,17 +114,17 @@ class laserBeam extends entity {
 		otherEntity.removeThisObject();
 		removeThisObject();
 		myPanel.myPlayer.points += otherEntity.getPoints();
-		if (myPanel.myPlayer.unlockedReflectEnemyLaser && otherEntity.entityName.equals("alienLaserBeam")) {
+		if (myPanel.myPlayer.unlockedReflectEnemyLaser && otherEntity.entityName.equals("balloonLaserBeam")) {
 			myPanel.entities.add(new laserBeam(x+20, 50));
 			myPanel.entities.add(new laserBeam(x-20, 50));
 		}
 	}
 }
 
-class alienLaserBeam extends entity {
+class balloonLaserBeam extends entity {
 	myPanel MyPanel;
-	public alienLaserBeam(int x, int y,myPanel MyPanel) {
-		super(x, y,"alienLaserBeam");
+	public balloonLaserBeam(int x, int y,myPanel MyPanel) {
+		super(x, y,"balloonLaserBeam");
 		this.MyPanel = MyPanel;
 		checkCollision = true;
 		points = 500;
@@ -138,7 +138,7 @@ class alienLaserBeam extends entity {
 	}
 
 	public void draw(Graphics g) {
-		g.setColor(Color.red);
+		g.setColor(Color.blue);
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setStroke(new BasicStroke(5));
 		g2.drawLine(x, y, x, y + 30);
@@ -159,7 +159,7 @@ class alienLaserBeam extends entity {
 	}
 }
 
-class alien extends entity{
+class balloon extends entity{
 	int width = 40;
 	int height = 40;
 	int speed = 1; // in pixels
@@ -167,7 +167,7 @@ class alien extends entity{
 	myPanel MyPanel;
 
 
-	public alien(int x,int y,myPanel MyPanel,int speed, String imageName){
+	public balloon(int x,int y,myPanel MyPanel,int speed, String imageName){
 		super(x,y,"bloon",imageName);
 
 		this.MyPanel = MyPanel;
@@ -180,8 +180,8 @@ class alien extends entity{
 			MyPanel.myPlayer.looseHealth();
 			removeThisObject();
 		}
-		if (Math.random() < 0.005){
-			MyPanel.entities.add(new alienLaserBeam(x,y-50,MyPanel));
+		if (Math.random() < 0.001){
+			MyPanel.entities.add(new balloonLaserBeam(x,y-50,MyPanel));
 		}
 	}
 
@@ -198,38 +198,38 @@ class alien extends entity{
 	}
 }
 
-class alienFactory{
+class balloonFactory{
 	myPanel MyPanel;
-	public alienFactory(myPanel MyPanel){
+	public balloonFactory(myPanel MyPanel){
 		this.MyPanel = MyPanel;
 	}
 
-	public alien newAlien(int x, int y){
+	public balloon newballoon(int x, int y){
 		
-		return new alien(x,y,MyPanel,1,"Images/Bloon_BLUE.png");
+		return new balloon(x,y,MyPanel,1,"Images/Bloon_BLUE.png");
 	}
 
-	public alien newAlien(int x, int y,int speed){
+	public balloon newballoon(int x, int y,int speed){
 
 		if(speed > 3){
-			return new alien(x,y,MyPanel,speed, "Images/Bloon_GREY.png");
+			return new balloon(x,y,MyPanel,speed, "Images/Bloon_GREY.png");
 		}
 
 		switch (speed) {
 			case 2:
-			return new alien(x,y,MyPanel,speed, "Images/Bloon_GREEN.png");
+			return new balloon(x,y,MyPanel,speed, "Images/Bloon_GREEN.png");
 		
 			case 3:
-			return new alien(x,y,MyPanel,speed, "Images/Bloon_RED.png");
+			return new balloon(x,y,MyPanel,speed, "Images/Bloon_RED.png");
 
 			default:
-			return new alien(x,y,MyPanel,speed, "Images/Bloon_BLUE.png");
+			return new balloon(x,y,MyPanel,speed, "Images/Bloon_BLUE.png");
 		}
 
 	}
 
-	public alien newAlien(int x, int y,int speed, boolean vis){
-		return new alien(x,y,MyPanel,speed, "");
+	public balloon newballoon(int x, int y,int speed, boolean vis){
+		return new balloon(x,y,MyPanel,speed, "");
 	}
 }
 
@@ -240,11 +240,11 @@ class player extends entity {
 	public boolean shoot;
 	private ArrayList<entity> entities;
 	public boolean unlockedTwoLaser = true;
-	public boolean unlockedTrident = false;
+	public boolean unlockedTrident = true;
 	public boolean unlockedHitEnemyLaser = true;
 	public boolean unlockedReflectEnemyLaser = false;
 	public boolean unlockedTeleportToCenter = false;
-	public boolean unlockedChargeLaser = false;
+	public boolean unlockedChargeLaser = true;
 	Timer shootTimer = new Timer(250);
 	Timer chargeTimerStart = new Timer(250);
 	Timer chargeTimerFinished = new Timer(1000);
@@ -259,6 +259,8 @@ class player extends entity {
 		health -= 1;
 		if (health == 0){
 			gameOver = true;
+			myPanel.gameOver = true;
+			myPanel.playOn = false;
 		}
 	}
 
@@ -383,7 +385,7 @@ class wave{
 //		super(entities);
 //		// TODO Auto-generated constructor stub
 //		for (int i=0;i<4;i++) {
-//			add(AlienFactory.newAlien(startX, startY+i*20,2));
+//			add(balloonFactory.newballoon(startX, startY+i*20,2));
 //		}
 //	}
 //
@@ -396,10 +398,10 @@ class wave{
 //		super(entities);
 //		// TODO Auto-generated constructor stub
 //		for (int i=0;i<4;i++) {
-//			add(new alien(startX+i*50, startY,2));
+//			add(new balloon(startX+i*50, startY,2));
 //		}
 //		for (int i=0;i<4;i++) {
-//			add(new alien(startX-i*50, startY,2));
+//			add(new balloon(startX-i*50, startY,2));
 //		}
 //	}
 //
@@ -415,45 +417,117 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	wave currentWave;
 	BufferedImage screenBuffer = new BufferedImage(1000,1000,BufferedImage.TYPE_INT_ARGB);
 	Graphics bufferG;
-	alienFactory AlienFactory;
+	balloonFactory balloonFactory;
 	Random rand = new Random();
 	long lastTime = 0;
 	public static player myPlayer;
 	int playerDirection = 0;
 	boolean shoot = false;
+	public static boolean playOn = true;
+	public static boolean gameOver = false;
 	myPanel(){
 		myPlayer = new player(0, 0,entities);
 		entities.add(myPlayer);
 		
-		AlienFactory = new alienFactory(this);
+		balloonFactory = new balloonFactory(this);
 
-		generateWaves(1);
-		finalWave();
-		end();
+		wave wave1 = new wave(entities);
+		//Spawn the first wave
+		wave1.add(balloonFactory.newballoon(500,950));
+		wave1.add(balloonFactory.newballoon(600,950));
+		wave1.add(balloonFactory.newballoon(400,950));
+		wave1.add(balloonFactory.newballoon(500,850));
+		wave1.add(balloonFactory.newballoon(600,850));
+		wave1.add(balloonFactory.newballoon(400,850));
+		waves.add(wave1);
+
+		wave testWave = new wave(entities);
+		//Spawn the first wave
+		testWave.add(balloonFactory.newballoon(500,950+400));
+		testWave.add(balloonFactory.newballoon(600,950+400,3));
+		testWave.add(balloonFactory.newballoon(400,1150+400));
+		testWave.add(balloonFactory.newballoon(200,850+400));
+		testWave.add(balloonFactory.newballoon(600,850+400,3));
+		testWave.add(balloonFactory.newballoon(400,850+400));
+		int centerX = 500;
+		int centerY = 1300+400;
+		for(int i=0;i<15;i++) {
+			testWave.add(balloonFactory.newballoon((int)rand.nextGaussian(centerX, 50),(int)rand.nextGaussian(centerY, 100)));
+		}
+		waves.add(testWave);
+
+		wave testWave2 = new wave(entities);
+		testWave2.add(balloonFactory.newballoon(500,950+350,3));
+		testWave2.add(balloonFactory.newballoon(600,950+350,3));
+		testWave2.add(balloonFactory.newballoon(600,1950+350,4));
+
+		centerX = 500;
+		centerY = 1300+350;
+		for(int i=0;i<5;i++) {
+			testWave2.add(balloonFactory.newballoon((int)rand.nextGaussian(centerX, 150),(int)rand.nextGaussian(centerY, 100)));
+		}
+		centerX = 500;
+		centerY = 2300+350;
+		for(int i=0;i<5;i++) {
+			testWave2.add(balloonFactory.newballoon((int)rand.nextGaussian(centerX, 150),(int)rand.nextGaussian(centerY, 100),3));
+		}
+		waves.add(testWave2);
+
+		wave wave2 = new wave(entities);
+		for(int i=0;i<20;i++) {
+			if (rand.nextBoolean()) {
+				wave2.add(balloonFactory.newballoon(rand.nextInt(400)+rand.nextInt(400),rand.nextInt(1000)+1300,rand.nextInt(2)+1));
+			}else {
+				wave2.add(balloonFactory.newballoon(rand.nextInt(400)+rand.nextInt(400),rand.nextInt(1000)+1300,rand.nextInt(3)+1));
+			}
+		}
+
+		for(int i=0;i<5;i++) {
+			wave2.add(balloonFactory.newballoon(rand.nextInt(900),rand.nextInt(500)+2500,3));
+		}
+		waves.add(wave2);
+
+		wave waveSnake = new wave(entities);
+		for(int i=0;i<5;i++) {
+			waveSnake.add(balloonFactory.newballoon(400,1950+i*25,1));
+		}
+		for(int i=0;i<5;i++) {
+			waveSnake.add(balloonFactory.newballoon(800,2350+i*25,2));
+		}
+		for(int i=0;i<5;i++) {
+			waveSnake.add(balloonFactory.newballoon(550,2950+i*25,3));
+		}
+		waves.add(waveSnake);
+
+		wave wave3 = new wave(entities);
+		centerX = 600;
+		centerY = 900;
+		for(int i=0;i<15;i++) {
+			wave3.add(balloonFactory.newballoon((int)rand.nextGaussian(centerX, 50),(int)rand.nextGaussian(centerY, 70)));
+		}
+		centerX = 300;
+		centerY = 1400;
+		for(int i=0;i<15;i++) {
+			wave3.add(balloonFactory.newballoon((int)rand.nextGaussian(centerX, 50),(int)rand.nextGaussian(centerY, 70)));
+		}
+		centerX = 500;
+		centerY = 2400;
+		for(int i=0;i<25;i++) {
+			wave3.add(balloonFactory.newballoon((int)rand.nextGaussian(centerX, 90),(int)rand.nextGaussian(centerY, 90)));
+		}
+		wave3.add(balloonFactory.newballoon(500,900,3));
+		wave3.add(balloonFactory.newballoon(246,700,3));
+
+		wave3.add(balloonFactory.newballoon(500,1900,3));
+		wave3.add(balloonFactory.newballoon(246,1700,3));
+
+		wave3.add(balloonFactory.newballoon(500,2900,3));
+		wave3.add(balloonFactory.newballoon(246,2700,3));
+		waves.add(wave3);
+		
 
 		wavesIterator = waves.iterator();
 		nextWave();
-	}
-
-	public void generateWaves(int num){
-		for (int i = 0; i < num; i++){
-			wave temp = new wave(entities);
-			temp.add(AlienFactory.newAlien(500,950));
-			temp.add(AlienFactory.newAlien(600,950));
-			temp.add(AlienFactory.newAlien(400,950));
-			temp.add(AlienFactory.newAlien(500,850));
-			temp.add(AlienFactory.newAlien(600,850));
-			temp.add(AlienFactory.newAlien(400,850));
-
-			temp.add(AlienFactory.newAlien(500,750, 2));
-			temp.add(AlienFactory.newAlien(600,750, 2));
-			temp.add(AlienFactory.newAlien(400,750, 2));
-			temp.add(AlienFactory.newAlien(500,650, 2));
-			temp.add(AlienFactory.newAlien(600,650, 2));
-			temp.add(AlienFactory.newAlien(400,650, 2));
-
-			waves.add(temp);
-		}
 	}
 
 
@@ -465,26 +539,26 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	public void finalWave(){
 		wave temp = new wave(entities);
 
-		temp.add(AlienFactory.newAlien(500,1050, 4));
-		temp.add(AlienFactory.newAlien(600,1050, 4));
-		temp.add(AlienFactory.newAlien(400,1050, 4));
-		temp.add(AlienFactory.newAlien(500,1150, 4));
-		temp.add(AlienFactory.newAlien(600,1150, 4));
-		temp.add(AlienFactory.newAlien(400,1150, 4));
+		temp.add(balloonFactory.newballoon(500,1050, 4));
+		temp.add(balloonFactory.newballoon(600,1050, 4));
+		temp.add(balloonFactory.newballoon(400,1050, 4));
+		temp.add(balloonFactory.newballoon(500,1150, 4));
+		temp.add(balloonFactory.newballoon(600,1150, 4));
+		temp.add(balloonFactory.newballoon(400,1150, 4));
 
-		temp.add(AlienFactory.newAlien(500,950, 3));
-		temp.add(AlienFactory.newAlien(600,950, 3));
-		temp.add(AlienFactory.newAlien(400,950, 3));
-		temp.add(AlienFactory.newAlien(500,850, 3));
-		temp.add(AlienFactory.newAlien(600,850, 3));
-		temp.add(AlienFactory.newAlien(400,850, 3));
+		temp.add(balloonFactory.newballoon(500,950, 3));
+		temp.add(balloonFactory.newballoon(600,950, 3));
+		temp.add(balloonFactory.newballoon(400,950, 3));
+		temp.add(balloonFactory.newballoon(500,850, 3));
+		temp.add(balloonFactory.newballoon(600,850, 3));
+		temp.add(balloonFactory.newballoon(400,850, 3));
 
-		temp.add(AlienFactory.newAlien(500,750, 2));
-		temp.add(AlienFactory.newAlien(600,750, 2));
-		temp.add(AlienFactory.newAlien(400,750, 2));
-		temp.add(AlienFactory.newAlien(500,650, 2));
-		temp.add(AlienFactory.newAlien(600,650, 2));
-		temp.add(AlienFactory.newAlien(400,650, 2));
+		temp.add(balloonFactory.newballoon(500,750, 2));
+		temp.add(balloonFactory.newballoon(600,750, 2));
+		temp.add(balloonFactory.newballoon(400,750, 2));
+		temp.add(balloonFactory.newballoon(500,650, 2));
+		temp.add(balloonFactory.newballoon(600,650, 2));
+		temp.add(balloonFactory.newballoon(400,650, 2));
 
 		waves.add(temp);
 	}
@@ -492,7 +566,7 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	public void end(){
 		wave end = new wave(entities);
 
-		end.add(AlienFactory.newAlien(0,0,0,false));
+		end.add(balloonFactory.newballoon(0,0,0,false));
 		waves.add(end);
 	}
 
@@ -508,7 +582,7 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 //		System.out.println(prev-now);
 //		prev = now;
 
-		bufferG.setColor(new Color(255, 179, 71));
+		bufferG.setColor(Color.LIGHT_GRAY);
 		bufferG.fillRect(0, 0, 1000, 1000);
 		bufferG.setColor(Color.CYAN);
 
@@ -660,9 +734,11 @@ public class userInterface implements KeyListener{
 		frame.setVisible(true);
 
 		panel.setGraphics();
-		while (playOn) {
+
+		while (true) {
 			panel.redraw();
 		}
+
 	}
 
 	public void periodic(){
