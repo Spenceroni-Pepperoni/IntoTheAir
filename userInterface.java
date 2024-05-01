@@ -58,6 +58,7 @@ abstract class entity{
 
 	public entity(int x,int y,String entityName) {
 		this.x = x;
+		
 		this.y = y;
 		this.entityName = entityName;
 	}
@@ -92,6 +93,31 @@ abstract class entity{
 	}
 }
 
+class balloonPoints extends entity{
+	Timer removeTimer = new Timer(800);
+	public balloonPoints(int x, int y, String entityName,int points) {
+		super(x, y, entityName);
+		this.points = points;
+	}
+
+	@Override
+	void update() {
+		// TODO Auto-generated method stub
+		if (removeTimer.finished()) {
+			removeThisObject();
+		}
+	}
+
+	@Override
+	void draw(Graphics g) {
+		// TODO Auto-generated method stub
+		g.setColor(Color.white);
+		g.setFont(new Font("Arial Black", Font.ITALIC, 25));
+		g.drawString(""+points, x, y);
+	}
+	
+}
+
 class laserBeam extends entity {
 	public laserBeam(int x,int y){
 		super(x,y,"laserBeam");
@@ -114,6 +140,10 @@ class laserBeam extends entity {
 		otherEntity.removeThisObject();
 		removeThisObject();
 		myPanel.myPlayer.points += otherEntity.getPoints();
+		if (!otherEntity.entityName.equals("balloonLaserBeam")) {
+			myPanel.entities.add(new balloonPoints(otherEntity.x, otherEntity.y, "ballonPoints", otherEntity.getPoints()));
+		}
+		
 		if (myPanel.myPlayer.unlockedReflectEnemyLaser && otherEntity.entityName.equals("balloonLaserBeam")) {
 			myPanel.entities.add(new laserBeam(x+20, 50));
 			myPanel.entities.add(new laserBeam(x-20, 50));
@@ -177,11 +207,11 @@ class balloon extends entity{
 		double dSpeed = speed;
 		y-= dSpeed / 2.0;
 		if (y < 0) {
-			MyPanel.myPlayer.looseHealth();
+			myPanel.myPlayer.looseHealth();
 			removeThisObject();
 		}
 		if (Math.random() < 0.001){
-			MyPanel.entities.add(new balloonLaserBeam(x,y-50,MyPanel));
+			myPanel.entities.add(new balloonLaserBeam(x,y-50,MyPanel));
 		}
 	}
 
@@ -425,10 +455,8 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	boolean shoot = false;
 	public static boolean playOn = true;
 	public static boolean gameOver = false;
-	myPanel(){
-		myPlayer = new player(0, 0,entities);
-		entities.add(myPlayer);
-		
+
+	public void resetWaves() {
 		balloonFactory = new balloonFactory(this);
 
 		wave wave1 = new wave(entities);
@@ -529,6 +557,13 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 		wavesIterator = waves.iterator();
 		nextWave();
 	}
+	
+	myPanel(){
+		myPlayer = new player(0, 0,entities);
+		entities.add(myPlayer);
+		
+		resetWaves();
+	}
 
 
 	public void nextWave() {
@@ -573,15 +608,19 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	public void setGraphics() {
 		G = getGraphics();
 		bufferG = screenBuffer.createGraphics();
-		bufferG.setFont(new Font("Arial Black", Font.BOLD, 30));
 	}
 
 	//	static long prev = 0;
 	public void paintComponent(Graphics g) {
+		if (gameOver) {
+			resetWaves();
+			gameOver = false;
+		}
 //		long now = System.currentTimeMillis();
 //		System.out.println(prev-now);
 //		prev = now;
 
+		bufferG.setFont(new Font("Arial Black", Font.BOLD, 30));
 		bufferG.setColor(Color.LIGHT_GRAY);
 		bufferG.fillRect(0, 0, 1000, 1000);
 		bufferG.setColor(Color.CYAN);
