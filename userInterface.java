@@ -19,30 +19,51 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import java.util.Random;
 
+/**
+ * Custom Timer class
+ */
 class Timer{
 	long timerLength;
 	long startTime = 0;
+
+	/**
+	 * Constructor
+	 * @param timerLength Length of the timer
+	 */
 	public Timer(long timerLength) {
 		this.timerLength = timerLength;
 		reset();
 	}
 
+	/**
+	 * @return if the timer is fnished
+	 */
 	public boolean finished() {
 		long currentTime = System.currentTimeMillis();
 		return (currentTime-startTime>timerLength);
 	}
 
+	/**
+	 * resets the timer
+	 */
 	public void reset() {
 		long currentTime = System.currentTimeMillis();
 		startTime = currentTime;
 	}
 
+	/**
+	 * Checks the timer differential
+	 * @return
+	 */
 	public long timeDif(){
 //		return (currentTime-startTime);
 		return 42;
 	}
 }
 
+/**
+ * Entity Class
+ */
 abstract class entity{
 	int x;
 	int y;
@@ -51,18 +72,37 @@ abstract class entity{
 	int points = 0;
 	String entityName = "";
 	public BufferedImage image;
+
+	/**
+	 * Entity Constructor
+	 * @param x x chord
+	 * @param y y chord
+	 */
 	public entity(int x,int y) {
 		this.x = x;
 		this.y = y;
 	}
 
+	/**
+	 * Entity Constructor
+	 * @param x x Chord
+	 * @param y y Chord
+	 * @param entityName name
+	 */
 	public entity(int x,int y,String entityName) {
 		this.x = x;
 		
 		this.y = y;
 		this.entityName = entityName;
 	}
-	
+
+	/**
+	 * Entity Constructor
+	 * @param x x Chord
+	 * @param y y Chord
+	 * @param entityName name
+	 * @param imageName filename of image
+	 */
 	public entity(int x,int y,String entityName,String imageName) {
 		this.x = x;
 		this.y = y;
@@ -74,32 +114,73 @@ abstract class entity{
 			e.printStackTrace();
 		}
 	}
-	
 
+
+	/**
+	 * Updates entity
+	 */
 	abstract void update();
 
+	/**
+	 * Draws entities on screen
+	 * @param g
+	 */
 	abstract void draw(Graphics g);
+
+	/**
+	 * Checks if entiies have collided
+	 * @param x x chord
+	 * @param y y chord
+	 * @return if entities have collided
+	 */
 	public boolean hasCollided(int x,int y){
 		return false;
 	}
+
+	/**
+	 * action that occurs after a collided
+	 * @param otherEntity the second entity
+	 */
 	public void collided(entity otherEntity){
 
 	}
+
+	/**
+	 * Deletes the entity
+	 */
 	public void removeThisObject(){
 		removeThisObject = true;
 	}
+
+	/**
+	 * @return get the points of the entity
+	 */
 	public int getPoints() {
 		return points;
 	}
 }
 
+/**
+ * Points earned by killingg each balloon
+ */
 class balloonPoints extends entity{
 	Timer removeTimer = new Timer(800);
+
+	/**
+	 * Balloon Point constructor
+	 * @param x x chord
+	 * @param y y chord
+	 * @param entityName name of the entity
+	 * @param points point value on death
+	 */
 	public balloonPoints(int x, int y, String entityName,int points) {
 		super(x, y, entityName);
 		this.points = points;
 	}
 
+	/**
+	 * Updates the entity
+	 */
 	@Override
 	void update() {
 		// TODO Auto-generated method stub
@@ -108,6 +189,10 @@ class balloonPoints extends entity{
 		}
 	}
 
+	/**
+	 * Redraws entity
+	 * @param g
+	 */
 	@Override
 	void draw(Graphics g) {
 		// TODO Auto-generated method stub
@@ -118,11 +203,24 @@ class balloonPoints extends entity{
 	
 }
 
+/**
+ * Laser beams
+ */
 class laserBeam extends entity {
+
+	/**
+	 * laser beam constructor
+	 * @param x x chord
+	 * @param y y chord
+	 */
 	public laserBeam(int x,int y){
 		super(x,y,"laserBeam");
 		checkCollision = true;
 	}
+
+	/**
+	 * Updates beam
+	 */
 	public void update() {
 		y += 11;
 		if (y > 800) {
@@ -130,12 +228,21 @@ class laserBeam extends entity {
 		}
 	}
 
+	/**
+	 * Draws the laser on the screen
+	 * @param g
+	 */
 	public void draw(Graphics g) {
 		g.setColor(Color.magenta);
 		g.drawLine(x, y, x, y+30);
 		g.drawLine(x+1, y, x+1, y+30);
 		g.drawLine(x+2, y, x+2, y+30);
 	}
+
+	/**
+	 * Action after entities have collided
+	 * @param otherEntity the second entity
+	 */
 	public void collided(entity otherEntity){
 		otherEntity.removeThisObject();
 		removeThisObject();
@@ -151,8 +258,18 @@ class laserBeam extends entity {
 	}
 }
 
+/**
+ * Balloon Laser beam class
+ */
 class balloonLaserBeam extends entity {
 	myPanel MyPanel;
+
+	/**
+	 * balloon laser beam constructor
+	 * @param x x chord
+	 * @param y y chord
+	 * @param MyPanel panel
+	 */
 	public balloonLaserBeam(int x, int y,myPanel MyPanel) {
 		super(x, y,"balloonLaserBeam");
 		this.MyPanel = MyPanel;
@@ -160,6 +277,9 @@ class balloonLaserBeam extends entity {
 		points = 500;
 	}
 
+	/**
+	 * Updates beams
+	 */
 	public void update() {
 		y -= 7;
 		if (y < 0) {
@@ -167,6 +287,10 @@ class balloonLaserBeam extends entity {
 		}
 	}
 
+	/**
+	 * Draws beam on the screen
+	 * @param g
+	 */
 	public void draw(Graphics g) {
 		g.setColor(Color.blue);
 		Graphics2D g2 = (Graphics2D) g;
@@ -174,6 +298,10 @@ class balloonLaserBeam extends entity {
 		g2.drawLine(x, y, x, y + 30);
 	}
 
+	/**
+	 * Action after entities have collided
+	 * @param otherEntity the second entity
+	 */
 	public void collided(entity otherEntity) {
 		if (otherEntity.entityName.equals("player")){
 			MyPanel.myPlayer.looseHealth();
@@ -181,6 +309,12 @@ class balloonLaserBeam extends entity {
 		}
 	}
 
+	/**
+	 * Checks if entiies have collided
+	 * @param x x chord
+	 * @param y y chord
+	 * @return if entities have collided
+	 */
 	public boolean hasCollided(int otherX,int otherY){
 		if (MyPanel.myPlayer.unlockedHitEnemyLaser) {
 			return (otherX < x+20 && otherX > x-20 && otherY < y+20 && otherY > y-20);
@@ -189,6 +323,9 @@ class balloonLaserBeam extends entity {
 	}
 }
 
+/**
+ * Balloon class
+ */
 class balloon extends entity{
 	int width = 40;
 	int height = 40;
@@ -228,6 +365,9 @@ class balloon extends entity{
 	}
 }
 
+/**
+ * Balloon factory 
+ */
 class balloonFactory{
 	myPanel MyPanel;
 	public balloonFactory(myPanel MyPanel){
@@ -438,6 +578,9 @@ class wave{
 //
 //}
 
+/**
+ * I aint commenting all dat
+ */
 class myPanel extends JPanel implements MouseListener,KeyListener{
 	Graphics G;
 	Timer graphicsTimer = new Timer(10);
