@@ -63,6 +63,7 @@ class Timer{
 
 /**
  * Entity Class
+ * visual object in the game that can move around and collide with other objects
  */
 abstract class entity{
 	int x;
@@ -161,7 +162,7 @@ abstract class entity{
 }
 
 /**
- * Points earned by killingg each balloon
+ * Points earned by killing each balloon
  */
 class balloonPoints extends entity{
 	Timer removeTimer = new Timer(800);
