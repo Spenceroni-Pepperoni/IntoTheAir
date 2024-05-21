@@ -403,6 +403,11 @@ class balloonFactory{
 	}
 }
 
+/**
+ * Player
+ * can move left and right and shoot
+ * takes damage from enemy lasers
+ */
 class player extends entity {
 	public boolean gameOver;
 	int health = 6;
@@ -497,6 +502,10 @@ class player extends entity {
 	}
 }
 
+/**
+ * Wave
+ * Group of enemies that player must defeat to move on 
+ */
 class wave{
 	ArrayList<entity> entities;
 	ArrayList<entity> waveEntities = new ArrayList<entity>();
@@ -599,6 +608,10 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	public static boolean playOn = true;
 	public static boolean gameOver = false;
 
+	/**
+	 * resetWaves
+	 * setup all the waves the player has to defeat inorder to win
+	 */
 	public void resetWaves() {
 		balloonFactory = new balloonFactory(this);
 
@@ -709,6 +722,10 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	}
 
 
+	/**
+	 * nextWave
+  	 * when the current wave of enemies is defeated, make the next wave appear
+	 */
 	public void nextWave() {
 		currentWave = wavesIterator.next();
 		currentWave.startWave();
@@ -754,6 +771,10 @@ class myPanel extends JPanel implements MouseListener,KeyListener{
 	}
 
 	//	static long prev = 0;
+	/**
+	 * paintComponet()
+  	 * main loop and draws everything on the screen
+	 */
 	public void paintComponent(Graphics g) {
 		if (gameOver) {
 			resetWaves();
